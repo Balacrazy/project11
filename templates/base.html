@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Home Cook Delivery{% endblock %}</title>
+    <meta name="description" content="Fresh, hygienic homemade meals delivered to your doorstep. Order from verified home cooks.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="{% if current_user.is_authenticated %}role-{{ current_user.role }}{% endif %}">
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <i class="fa-solid fa-bowl-food brand-icon"></i>
+                <span>Home Cook <span class="accent-text">Delivery</span></span>
+            </a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="nav-links" id="navLinks">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'customer' %}
+                        <a href="{{ url_for('customer_dashboard') }}" class="nav-link"><i class="fa-solid fa-house"></i> Home</a>
+                        <a href="{{ url_for('view_cart') }}" class="nav-link"><i class="fa-solid fa-cart-shopping"></i> Cart</a>
+                        <a href="{{ url_for('customer_history') }}" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Orders</a>
+                        <a href="{{ url_for('customer_profile') }}" class="nav-link"><i class="fa-regular fa-user"></i> Profile</a>
+                    {% elif current_user.role == 'cook' %}
+                        <a href="{{ url_for('cook_dashboard') }}" class="nav-link"><i class="fa-solid fa-bell-concierge"></i> Dashboard</a>
+                        <a href="{{ url_for('cook_menu') }}" class="nav-link"><i class="fa-solid fa-book-open"></i> Menu</a>
+                        <a href="{{ url_for('cook_history') }}" class="nav-link"><i class="fa-solid fa-indian-rupee-sign"></i> Earnings</a>
+                        <a href="{{ url_for('cook_profile') }}" class="nav-link"><i class="fa-regular fa-user"></i> Profile</a>
+                    {% elif current_user.role == 'delivery' %}
+                        <a href="{{ url_for('delivery_dashboard') }}" class="nav-link"><i class="fa-solid fa-motorcycle"></i> Dashboard</a>
+                        <a href="{{ url_for('delivery_history') }}" class="nav-link"><i class="fa-solid fa-indian-rupee-sign"></i> Earnings</a>
+                        <a href="{{ url_for('delivery_profile') }}" class="nav-link"><i class="fa-regular fa-user"></i> Profile</a>
+                    {% endif %}
+                    <a href="{{ url_for('logout') }}" class="nav-btn btn-outline-nav"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                {% else %}
+                    <a href="{{ url_for('index') }}" class="nav-btn btn-primary-nav">Sign Up / Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="flash-messages" id="flashMessages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-alert alert-{{ category }}">
+                        <div class="flash-content">
+                            {% if category == 'success' %}
+                                <i class="fa-solid fa-circle-check"></i>
+                            {% elif category == 'error' %}
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                            {% else %}
+                                <i class="fa-solid fa-circle-info"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                        <button class="close-alert" onclick="this.parentElement.remove();">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="content-wrapper">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3><i class="fa-solid fa-bowl-food"></i> Home Cook <span class="accent-text">Delivery</span></h3>
+                <p>Fresh homemade meals, delivered with care.</p>
+            </div>
+            <div class="footer-links">
+                <p>&copy; 2026 Home Cook Delivery. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

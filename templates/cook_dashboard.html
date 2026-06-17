@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Cook Dashboard - Home Cook Delivery{% endblock %}
+
+{% block content %}
+<div class="cook-dashboard">
+    <div class="cook-hero">
+        <div class="cook-hero-content">
+            <h1>Home Cook<br>Dashboard</h1>
+        </div>
+    </div>
+
+    <div class="overview-card">
+        <h3>Today's Overview</h3>
+        <div class="overview-grid">
+            <div class="overview-stat">
+                <span class="stat-label">Today's Earnings</span>
+                <span class="stat-value">₹{{ "%.0f"|format(todays_earnings) }}</span>
+            </div>
+            <div class="overview-stat">
+                <span class="stat-label">Active Orders</span>
+                <span class="stat-value">{{ orders|length }}</span>
+            </div>
+            <div class="overview-stat">
+                <span class="stat-label">Online Status</span>
+                <a href="{{ url_for('cook_toggle_online') }}" class="online-toggle {% if current_user.is_online %}active{% endif %}" id="onlineToggle">
+                    <span class="toggle-slider"></span>
+                </a>
+                <span class="status-text {% if current_user.is_online %}online{% else %}offline{% endif %}">
+                    {{ 'Online' if current_user.is_online else 'Offline' }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="section-title"><i class="fa-solid fa-bell"></i> Incoming Orders</h3>
+
+    <div class="cook-orders-list">
+        {% if orders %}
+            {% for order in orders %}
+            <div class="cook-order-card">
+                <div class="cook-order-header">
+                    <div>
+                        <h4>Order #{{ order.id }}</h4>
+                        <span class="customer-name">Customer: {{ order.customer.name }}</span>
+                        <div class="order-items-summary">
+                            Items: {% for item in order.items %}{{ item.quantity }}x {{ item.dish.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+                        </div>
+                    </div>
+                    <div class="order-time">
+                        <span class="time-value">{{ order.created_at.strftime('%I:%M %p') }}</span>
+                        <span class="status-badge {{ order.status|lower|replace(' ','-') }}">{{ order.status }}</span>
+                    </div>
+                </div>
+
+                <div class="cook-order-footer">
+                    <span class="order-amount">₹{{ "%.0f"|format(order.subtotal) }}
+                        <small>({{ order.payment_method|upper }}{% if order.payment_status == 'Paid' %} - Paid{% endif %})</small>
+                    </span>
+                    <div class="cook-order-actions">
+                        {% if order.status == 'Pending' %}
+                            <form action="{{ url_for('order_action', order_id=order.id, action='accept') }}" method="POST">
+                                <button type="submit" class="btn-accept" id="acceptOrder_{{ order.id }}"><i class="fa-solid fa-check"></i> Accept</button>
+                            </form>
+                            <form action="{{ url_for('order_action', order_id=order.id, action='reject') }}" method="POST">
+                                <button type="submit" class="btn-reject" id="rejectOrder_{{ order.id }}"><i class="fa-solid fa-xmark"></i> Reject</button>
+                            </form>
+                        {% elif order.status == 'Accepted' %}
+                            <form action="{{ url_for('order_action', order_id=order.id, action='preparing') }}" method="POST">
+                                <button type="submit" class="btn-accept" id="prepareOrder_{{ order.id }}"><i class="fa-solid fa-fire"></i> Start Preparing</button>
+                            </form>
+                        {% elif order.status == 'Preparing' %}
+                            <form action="{{ url_for('order_action', order_id=order.id, action='ready') }}" method="POST">
+                                <button type="submit" class="btn-accept btn-ready" id="readyOrder_{{ order.id }}"><i class="fa-solid fa-bell-concierge"></i> Food is Ready</button>
+                            </form>
+                        {% elif order.status == 'Ready for Delivery' %}
+                            <span class="waiting-badge"><i class="fa-solid fa-clock"></i> Waiting for Delivery Partner</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state cook-empty">
+                <i class="fa-solid fa-utensils"></i>
+                <h3>No Active Orders</h3>
+                <p>Waiting for customers to order your delicious food.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

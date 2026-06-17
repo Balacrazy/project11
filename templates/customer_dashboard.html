@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Browse Food - Home Cook Delivery{% endblock %}
+
+{% block content %}
+<div class="customer-dashboard">
+    <div class="dashboard-header">
+        <div>
+            <h2>Welcome, <span class="accent-text">{{ current_user.name }}</span> 👋</h2>
+            <p class="subtitle">What would you like to eat today?</p>
+        </div>
+        <a href="{{ url_for('view_cart') }}" class="cart-btn" id="cartBtn">
+            <i class="fa-solid fa-cart-shopping"></i>
+            {% if cart_count > 0 %}
+            <span class="cart-badge">{{ cart_count }}</span>
+            {% endif %}
+        </a>
+    </div>
+
+    <div class="search-section">
+        <form action="{{ url_for('customer_dashboard') }}" method="GET" class="search-form">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" name="search" class="search-input" placeholder="Search for dishes, cooks..."
+                       value="{{ search_query }}" id="searchInput">
+            </div>
+        </form>
+    </div>
+
+    <div class="category-pills" id="categoryPills">
+        <a href="{{ url_for('customer_dashboard', category='All') }}"
+           class="category-pill {% if category == 'All' %}active{% endif %}">All</a>
+        <a href="{{ url_for('customer_dashboard', category='Breakfast') }}"
+           class="category-pill {% if category == 'Breakfast' %}active{% endif %}">🌅 Breakfast</a>
+        <a href="{{ url_for('customer_dashboard', category='Lunch') }}"
+           class="category-pill {% if category == 'Lunch' %}active{% endif %}">🍛 Lunch</a>
+        <a href="{{ url_for('customer_dashboard', category='Snacks') }}"
+           class="category-pill {% if category == 'Snacks' %}active{% endif %}">🍿 Snacks</a>
+        <a href="{{ url_for('customer_dashboard', category='Sweets') }}"
+           class="category-pill {% if category == 'Sweets' %}active{% endif %}">🍬 Sweets</a>
+        <a href="{{ url_for('customer_dashboard', category='Dinner') }}"
+           class="category-pill {% if category == 'Dinner' %}active{% endif %}">🌙 Dinner</a>
+    </div>
+
+    <div class="food-grid" id="foodGrid">
+        {% if dishes %}
+            {% for dish in dishes %}
+            <div class="food-card" data-name="{{ dish.name|lower }}" data-category="{{ dish.category }}">
+                <div class="food-image">
+                    <img src="{{ url_for('static', filename='uploads/' + dish.image_filename) }}"
+                         alt="{{ dish.name }}" onerror="this.src='https://via.placeholder.com/300x200/6C63FF/fff?text={{ dish.name }}'">
+                    {% if dish.rating %}
+                    <span class="food-rating"><i class="fa-solid fa-star"></i> {{ dish.rating }}</span>
+                    {% endif %}
+                </div>
+                <div class="food-info">
+                    <h3 class="food-name">{{ dish.name }}</h3>
+                    <p class="food-description">{{ dish.description }}</p>
+                    <p class="food-chef"><i class="fa-solid fa-user-chef"></i> {{ dish.cook.name }}
+                        {% if dish.rating %}<span class="chef-rating">{{ dish.rating }}★</span>{% endif %}</p>
+                    <div class="food-price-row">
+                        <span class="food-price">₹{{ "%.0f"|format(dish.price) }}</span>
+                        <form action="{{ url_for('add_to_cart', dish_id=dish.id) }}" method="POST" class="add-cart-form">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn-add-cart" id="addCart_{{ dish.id }}">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-bowl-food"></i>
+                <h3>No dishes available right now</h3>
+                <p>Our home cooks are preparing delicious meals. Please check back soon!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

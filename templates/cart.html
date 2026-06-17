@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Checkout - Home Cook Delivery{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+    <div class="cart-header">
+        <a href="{{ url_for('customer_dashboard') }}" class="back-btn" id="backToMenu"><i class="fa-solid fa-arrow-left"></i></a>
+        <h2>Checkout Summary</h2>
+    </div>
+
+    {% if cart %}
+    <div class="cart-layout">
+        <div class="cart-items-section">
+            <div class="section-label">ORDER ITEMS</div>
+            {% for dish_id, item in cart.items() %}
+            <div class="cart-item">
+                <div class="cart-item-image">
+                    <img src="{{ url_for('static', filename='uploads/' + item.image) }}" alt="{{ item.name }}"
+                         onerror="this.src='https://via.placeholder.com/80x80/6C63FF/fff?text=Food'">
+                </div>
+                <div class="cart-item-info">
+                    <h4>{{ item.name }}</h4>
+                    <p class="cart-item-desc">{{ item.description[:40] }}{% if item.description|length > 40 %}...{% endif %}</p>
+                </div>
+                <div class="cart-item-actions">
+                    <span class="cart-item-price">₹{{ "%.0f"|format(item.price * item.quantity) }}</span>
+                    <div class="quantity-control">
+                        <form action="{{ url_for('update_cart', dish_id=dish_id) }}" method="POST" class="qty-form">
+                            <input type="hidden" name="quantity" value="{{ item.quantity - 1 }}">
+                            <button type="submit" class="qty-btn" id="qtyDec_{{ dish_id }}">−</button>
+                        </form>
+                        <span class="qty-value">{{ item.quantity }}</span>
+                        <form action="{{ url_for('update_cart', dish_id=dish_id) }}" method="POST" class="qty-form">
+                            <input type="hidden" name="quantity" value="{{ item.quantity + 1 }}">
+                            <button type="submit" class="qty-btn" id="qtyInc_{{ dish_id }}">+</button>
+                        </form>
+                    </div>
+                    <form action="{{ url_for('remove_from_cart', dish_id=dish_id) }}" method="GET">
+                        <button type="submit" class="remove-btn" id="removeItem_{{ dish_id }}"><i class="fa-solid fa-trash-can"></i></button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="bill-section">
+            <div class="section-label">BILL DETAILS</div>
+            <div class="bill-card">
+                <div class="bill-row"><span>Item Total</span><span>₹{{ "%.0f"|format(subtotal) }}</span></div>
+                <div class="bill-row"><span>Delivery Fee</span><span>₹{{ "%.0f"|format(delivery_fee) }}</span></div>
+                <div class="bill-row"><span>Taxes & Charges (GST 5%)</span><span>₹{{ "%.0f"|format(taxes) }}</span></div>
+                <div class="bill-row bill-total"><strong>To Pay</strong><strong>₹{{ "%.0f"|format(total) }}</strong></div>
+            </div>
+        </div>
+
+        <form action="{{ url_for('checkout') }}" method="POST" class="checkout-form">
+            <div class="section-label">DELIVERY ADDRESS</div>
+            <div class="address-card">
+                <div class="address-icon"><i class="fa-solid fa-location-dot"></i></div>
+                <div class="address-content">
+                    <textarea name="delivery_address" class="form-control" rows="2" required
+                              placeholder="Enter delivery address">{{ current_user.address }}</textarea>
+                </div>
+            </div>
+
+            <div class="section-label">PAYMENT OPTIONS</div>
+            <div class="payment-options">
+                <label class="payment-option" id="paymentUpi">
+                    <input type="radio" name="payment_method" value="upi">
+                    <div class="payment-card">
+                        <i class="fa-solid fa-mobile-screen-button payment-icon"></i>
+                        <span>UPI (Google Pay, PhonePe, etc.)</span>
+                    </div>
+                </label>
+                <label class="payment-option" id="paymentCod">
+                    <input type="radio" name="payment_method" value="cod" checked>
+                    <div class="payment-card active-payment">
+                        <i class="fa-solid fa-money-bill-wave payment-icon"></i>
+                        <span>Cash on Delivery</span>
+                    </div>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary btn-full place-order-btn" id="placeOrderBtn">
+                <i class="fa-solid fa-bag-shopping"></i> Place Order - ₹{{ "%.0f"|format(total) }}
+            </button>
+        </form>
+
+        <a href="{{ url_for('clear_cart') }}" class="clear-cart-link" id="clearCartBtn">
+            <i class="fa-solid fa-trash"></i> Clear Cart
+        </a>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-cart-plus"></i>
+        <h3>Your cart is empty</h3>
+        <p>Add some delicious homemade dishes to get started!</p>
+        <a href="{{ url_for('customer_dashboard') }}" class="btn-primary" id="browseMenuBtn">Browse Menu</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('.payment-option input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            document.querySelectorAll('.payment-card').forEach(card => card.classList.remove('active-payment'));
+            radio.closest('.payment-option').querySelector('.payment-card').classList.add('active-payment');
+        });
+    });
+</script>
+{% endblock %}

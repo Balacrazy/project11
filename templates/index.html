@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Home Cook Delivery - Fresh Homemade Meals{% endblock %}
+
+{% block content %}
+<div class="landing-page">
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Home Cook<br>Delivery</h1>
+            <p class="hero-subtitle">Fresh, hygienic & healthy homemade meals delivered right to your doorstep.</p>
+        </div>
+    </div>
+
+    <div class="role-cards-section">
+        <a href="{{ url_for('login', role='customer') }}" class="role-card customer-card" id="customerCard">
+            <div class="role-card-icon"><i class="fa-solid fa-utensils"></i></div>
+            <div class="role-card-info">
+                <h3>Customer</h3>
+                <p>Order Delicious Homemade Meals</p>
+            </div>
+            <i class="fa-solid fa-chevron-right role-arrow"></i>
+        </a>
+
+        <a href="{{ url_for('login', role='cook') }}" class="role-card cook-card" id="cookCard">
+            <div class="role-card-icon"><i class="fa-solid fa-fire-burner"></i></div>
+            <div class="role-card-info">
+                <h3>Home Cook</h3>
+                <p>Share Your Culinary Creations</p>
+            </div>
+            <i class="fa-solid fa-chevron-right role-arrow"></i>
+        </a>
+
+        <a href="{{ url_for('login', role='delivery') }}" class="role-card delivery-card" id="deliveryCard">
+            <div class="role-card-icon"><i class="fa-solid fa-motorcycle"></i></div>
+            <div class="role-card-info">
+                <h3>Delivery Partner</h3>
+                <p>Join Our Delivery Network</p>
+            </div>
+            <i class="fa-solid fa-chevron-right role-arrow"></i>
+        </a>
+    </div>
+
+    <div class="features-section">
+        <div class="feature-item">
+            <i class="fa-solid fa-leaf"></i>
+            <h4>100% Homemade</h4>
+            <p>Authentic recipes cooked fresh at home with love</p>
+        </div>
+        <div class="feature-item">
+            <i class="fa-solid fa-truck-fast"></i>
+            <h4>Fast Delivery</h4>
+            <p>Hot food delivered right to your doorstep</p>
+        </div>
+        <div class="feature-item">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h4>Safe & Hygienic</h4>
+            <p>Verified home cooks with quality standards</p>
+        </div>
+    </div>
+
+    <div class="landing-footer">
+        <p>New here? <strong>Sign Up</strong> or <strong>Log In</strong> to get started</p>
+        <p class="help-link"><i class="fa-solid fa-circle-question"></i> Help & Support</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Delivery Dashboard - Home Cook Delivery{% endblock %}
+
+{% block content %}
+<div class="delivery-dashboard">
+    <div class="delivery-header">
+        <h2>Delivery Partner Portal</h2>
+        <div class="delivery-user-icon"><i class="fa-solid fa-circle-user"></i></div>
+    </div>
+
+    {% if my_active_orders %}
+    <h3 class="section-title delivery-section-title"><i class="fa-solid fa-motorcycle"></i> Your Active Deliveries</h3>
+    <div class="delivery-orders-list">
+        {% for order in my_active_orders %}
+        <div class="delivery-task-card active-delivery">
+            <div class="delivery-task-header">
+                <span class="task-order-id">Order #{{ order.id }}</span>
+                <span class="task-earnings">Earn ₹{{ "%.0f"|format(order.delivery_charge) }}</span>
+            </div>
+            <div class="delivery-task-details">
+                <div class="task-point">
+                    <div class="point-icon pickup"><i class="fa-solid fa-store"></i></div>
+                    <div class="point-info">
+                        <strong>Pickup from Home Cook</strong>
+                        <span class="point-name">{{ order.cook_rel.name }}</span>
+                        <span class="point-address">{{ order.cook_rel.address or 'Address not provided' }}</span>
+                    </div>
+                </div>
+                <div class="task-connector"></div>
+                <div class="task-point">
+                    <div class="point-icon dropoff"><i class="fa-solid fa-location-dot"></i></div>
+                    <div class="point-info">
+                        <strong>Drop-off to Customer</strong>
+                        <span class="point-name">{{ order.customer.name }} ({{ order.customer.phone }})</span>
+                        <span class="point-address">{{ order.delivery_address }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="delivery-payment-info">
+                {% if order.payment_method == 'cod' %}
+                    <span class="cod-badge"><i class="fa-solid fa-money-bill"></i> Collect Cash: ₹{{ "%.0f"|format(order.total_amount) }}</span>
+                {% else %}
+                    <span class="paid-badge"><i class="fa-solid fa-check-circle"></i> Online Payment - Already Paid</span>
+                {% endif %}
+            </div>
+            <form action="{{ url_for('delivery_action', order_id=order.id, action='delivered') }}" method="POST">
+                <button type="submit" class="btn-delivered" id="deliverOrder_{{ order.id }}">
+                    <i class="fa-solid fa-box-open"></i> Mark as Delivered
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h3 class="section-title delivery-section-title"><i class="fa-solid fa-list-check"></i> Available Tasks</h3>
+    <div class="delivery-orders-list">
+        {% if available_orders %}
+            {% for order in available_orders %}
+            <div class="delivery-task-card">
+                <div class="delivery-task-details">
+                    <div class="task-point">
+                        <div class="point-icon pickup"><i class="fa-solid fa-store"></i></div>
+                        <div class="point-info">
+                            <strong>Pickup from Home Cook</strong>
+                            <span class="point-name">{{ order.cook_rel.name }}</span>
+                            <span class="point-address">{{ order.cook_rel.address or 'Address not provided' }}</span>
+                        </div>
+                    </div>
+                    <div class="task-connector"></div>
+                    <div class="task-point">
+                        <div class="point-icon dropoff"><i class="fa-solid fa-location-dot"></i></div>
+                        <div class="point-info">
+                            <strong>Drop-off to Customer</strong>
+                            <span class="point-name">{{ order.customer.name }}</span>
+                            <span class="point-address">{{ order.delivery_address[:60] }}{% if order.delivery_address|length > 60 %}...{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+                <form action="{{ url_for('delivery_action', order_id=order.id, action='accept') }}" method="POST">
+                    <button type="submit" class="btn-accept-delivery" id="acceptDelivery_{{ order.id }}">
+                        Accept Delivery | ₹{{ "%.0f"|format(order.delivery_charge) }} INR
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state delivery-empty">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <h3>No Delivery Requests</h3>
+                <p>No orders waiting for delivery right now. Check back soon!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

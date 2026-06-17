@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Cook Earnings - Home Cook Delivery{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <div class="page-header">
+        <h2><i class="fa-solid fa-indian-rupee-sign"></i> Earnings & History</h2>
+    </div>
+
+    <div class="earnings-summary-card">
+        <div class="earnings-stat">
+            <span class="earnings-label">Total Earnings</span>
+            <span class="earnings-value">₹{{ "%.0f"|format(total_earnings) }}</span>
+        </div>
+        <div class="earnings-stat">
+            <span class="earnings-label">Orders Completed</span>
+            <span class="earnings-value">{{ orders|selectattr('status', 'equalto', 'Delivered')|list|length }}</span>
+        </div>
+    </div>
+
+    {% if orders %}
+    <div class="orders-list">
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-card-header">
+                <div>
+                    <h4>Order #{{ order.id }}</h4>
+                    <span class="order-date">{{ order.created_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+                </div>
+                <div class="order-status status-{{ order.status|lower|replace(' ', '-') }}">{{ order.status }}</div>
+            </div>
+            <div class="order-items-list">
+                {% for item in order.items %}
+                <div class="order-item-row">
+                    <span class="item-qty">{{ item.quantity }}x</span>
+                    <span class="item-name">{{ item.dish.name }}</span>
+                    <span class="item-price">₹{{ "%.0f"|format(item.price * item.quantity) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="order-card-footer">
+                <span>Customer: {{ order.customer.name }}</span>
+                {% if order.status == 'Delivered' %}
+                <span class="cook-earning">Your Earning: <strong>₹{{ "%.0f"|format(order.subtotal * 0.90) }}</strong></span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state cook-empty">
+        <i class="fa-solid fa-receipt"></i>
+        <h3>No completed orders yet</h3>
+        <p>Your order history and earnings will appear here.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

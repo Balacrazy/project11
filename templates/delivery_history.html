@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Delivery Earnings - Home Cook Delivery{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <div class="page-header">
+        <h2><i class="fa-solid fa-indian-rupee-sign"></i> Delivery Earnings</h2>
+    </div>
+
+    <div class="earnings-summary-card delivery-earnings">
+        <div class="earnings-stat">
+            <span class="earnings-label">Total Earnings</span>
+            <span class="earnings-value">₹{{ "%.0f"|format(total_earnings) }}</span>
+        </div>
+        <div class="earnings-stat">
+            <span class="earnings-label">Deliveries Done</span>
+            <span class="earnings-value">{{ orders|length }}</span>
+        </div>
+    </div>
+
+    {% if orders %}
+    <div class="orders-list">
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-card-header">
+                <div>
+                    <h4>Order #{{ order.id }}</h4>
+                    <span class="order-date">{{ order.created_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+                </div>
+                <span class="delivery-earning-badge">+₹{{ "%.0f"|format(order.delivery_charge) }}</span>
+            </div>
+            <div class="delivery-history-details">
+                <p><i class="fa-solid fa-store"></i> Cook: {{ order.cook_rel.name }}</p>
+                <p><i class="fa-solid fa-user"></i> Customer: {{ order.customer.name }}</p>
+                <p><i class="fa-solid fa-location-dot"></i> {{ order.delivery_address[:50] }}{% if order.delivery_address|length > 50 %}...{% endif %}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state delivery-empty">
+        <i class="fa-solid fa-motorcycle"></i>
+        <h3>No deliveries yet</h3>
+        <p>Complete deliveries to start earning. Go to your dashboard to accept tasks!</p>
+        <a href="{{ url_for('delivery_dashboard') }}" class="btn-primary" id="goToDashboard">Go to Dashboard</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

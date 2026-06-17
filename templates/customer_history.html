@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Order History - Home Cook Delivery{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <div class="page-header">
+        <h2><i class="fa-solid fa-clock-rotate-left"></i> Order History</h2>
+    </div>
+
+    {% if orders %}
+    <div class="orders-list">
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-card-header">
+                <div>
+                    <h4>Order #{{ order.id }}</h4>
+                    <span class="order-date">{{ order.created_at.strftime('%d %b %Y, %I:%M %p') }}</span>
+                </div>
+                <div class="order-status status-{{ order.status|lower|replace(' ', '-') }}">
+                    {% if order.status == 'Pending' %}<i class="fa-solid fa-hourglass-half"></i>
+                    {% elif order.status == 'Accepted' %}<i class="fa-solid fa-check"></i>
+                    {% elif order.status == 'Preparing' %}<i class="fa-solid fa-fire"></i>
+                    {% elif order.status == 'Ready for Delivery' %}<i class="fa-solid fa-bell"></i>
+                    {% elif order.status == 'Picked Up' %}<i class="fa-solid fa-motorcycle"></i>
+                    {% elif order.status == 'Delivered' %}<i class="fa-solid fa-circle-check"></i>
+                    {% elif order.status == 'Rejected' %}<i class="fa-solid fa-circle-xmark"></i>
+                    {% endif %}
+                    {{ order.status }}
+                </div>
+            </div>
+
+            <div class="order-items-list">
+                {% for item in order.items %}
+                <div class="order-item-row">
+                    <span class="item-qty">{{ item.quantity }}x</span>
+                    <span class="item-name">{{ item.dish.name }}</span>
+                    <span class="item-price">₹{{ "%.0f"|format(item.price * item.quantity) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="order-card-footer">
+                <div class="order-meta">
+                    <span><i class="fa-solid fa-indian-rupee-sign"></i> {{ order.payment_method|upper }}</span>
+                    <span class="payment-badge {% if order.payment_status == 'Paid' %}paid{% else %}pending{% endif %}">
+                        {{ order.payment_status }}
+                    </span>
+                </div>
+                <div class="order-total">
+                    <strong>Total: ₹{{ "%.0f"|format(order.total_amount) }}</strong>
+                </div>
+            </div>
+
+            {% if order.status not in ['Rejected'] %}
+            <div class="order-tracker">
+                <div class="tracker-step {% if order.status in ['Pending','Accepted','Preparing','Ready for Delivery','Picked Up','Delivered'] %}completed{% endif %}">
+                    <div class="tracker-dot"></div><span>Placed</span>
+                </div>
+                <div class="tracker-line {% if order.status in ['Accepted','Preparing','Ready for Delivery','Picked Up','Delivered'] %}completed{% endif %}"></div>
+                <div class="tracker-step {% if order.status in ['Accepted','Preparing','Ready for Delivery','Picked Up','Delivered'] %}completed{% endif %}">
+                    <div class="tracker-dot"></div><span>Accepted</span>
+                </div>
+                <div class="tracker-line {% if order.status in ['Preparing','Ready for Delivery','Picked Up','Delivered'] %}completed{% endif %}"></div>
+                <div class="tracker-step {% if order.status in ['Preparing','Ready for Delivery','Picked Up','Delivered'] %}completed{% endif %}">
+                    <div class="tracker-dot"></div><span>Preparing</span>
+                </div>
+                <div class="tracker-line {% if order.status in ['Ready for Delivery','Picked Up','Delivered'] %}completed{% endif %}"></div>
+                <div class="tracker-step {% if order.status in ['Ready for Delivery','Picked Up','Delivered'] %}completed{% endif %}">
+                    <div class="tracker-dot"></div><span>Ready</span>
+                </div>
+                <div class="tracker-line {% if order.status in ['Picked Up','Delivered'] %}completed{% endif %}"></div>
+                <div class="tracker-step {% if order.status in ['Picked Up','Delivered'] %}completed{% endif %}">
+                    <div class="tracker-dot"></div><span>On the Way</span>
+                </div>
+                <div class="tracker-line {% if order.status == 'Delivered' %}completed{% endif %}"></div>
+                <div class="tracker-step {% if order.status == 'Delivered' %}completed{% endif %}">
+                    <div class="tracker-dot"></div><span>Delivered</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-receipt"></i>
+        <h3>No orders yet</h3>
+        <p>Start ordering delicious homemade food!</p>
+        <a href="{{ url_for('customer_dashboard') }}" class="btn-primary" id="startOrderBtn">Browse Menu</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
